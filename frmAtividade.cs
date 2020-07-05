@@ -77,9 +77,6 @@ namespace Atividade
             }
         }
 
-
-
-
         private void CodigoAtividade(string filePath)
         {
             // CÓDIGO AQUI!!
@@ -103,15 +100,16 @@ namespace Atividade
                             maze[l + "," + c] = vector2[c-1];
                         }
                     }
-                    
-                    // mostra o labirinto lido
-                    foreach(var item in maze)
-                    {
-                        Console.WriteLine("key: " + item.Key + " value: " + item.Value);
-                    }
+
+                    // salva as posições visitadas
+                    List<string> visitedPositions = new List<string>();
+                    List<string> auxRetorno = new List<string>();
+
+                    // salva a posição atual
+                    int currentPositionLine = 0;
+                    int currentPositionColumn = 0;
 
                     // verifica se no labirinto existe o ponto de origem (X)
-                    string o = null;
                     if (maze.ContainsValue("X"))
                     {
                         // identifica e salva a posição de origem
@@ -121,12 +119,109 @@ namespace Atividade
                             {
                                 if (maze[l + "," + c].Equals("X"))
                                 {
-                                    o = l + "," + c;
+                                    currentPositionLine = l;
+                                    currentPositionColumn = c;
+                                    visitedPositions.Add("O [" + l + ", " + c + "]");
                                 }
                             }
                         }
-                        Console.WriteLine("Ponto de origem encontrado na posição: " + o);
-                    } else
+                        string nextPosition = "", previousPosition = "O";
+                        int countPossibleMovements;
+                        do
+                        {
+                            // testa se pode deslocar para baixo
+                            countPossibleMovements = 0;
+                            if ((currentPositionLine + 1) > 0)
+                            {
+                                if (maze[(currentPositionLine + 1) + "," + currentPositionColumn].Equals("0") && !previousPosition.Equals("C"))
+                                {
+                                    nextPosition = "B";
+                                    countPossibleMovements++;
+                                }
+                            }
+                            // testa se pode deslocar para direita
+                            if ((currentPositionColumn + 1) > 0)
+                            {
+                                if (maze[currentPositionLine + "," + (currentPositionColumn + 1)].Equals("0") && !previousPosition.Equals("E"))
+                                {
+                                    nextPosition = "D";
+                                    countPossibleMovements++;
+                                }
+                            }
+                            // testa se pode deslocar para esquerda
+                            if ((currentPositionColumn - 1) > 0)
+                            {
+                                if (maze[currentPositionLine + "," + (currentPositionColumn - 1)].Equals("0") && !previousPosition.Equals("D"))
+                                {
+                                    nextPosition = "E";
+                                    countPossibleMovements++;
+                                }
+                            }
+                            // testa se pode deslocar para cima
+                            if ((currentPositionLine - 1) > 0)
+                            {
+                                if (maze[(currentPositionLine - 1) + "," + currentPositionColumn].Equals("0") && !previousPosition.Equals("B"))
+                                {
+                                    nextPosition = "C";
+                                    countPossibleMovements++;
+                                }
+                            }
+                            if (countPossibleMovements == 0)
+                            {
+                                nextPosition = auxRetorno.Last().Substring(0, 1);
+                                string[] vector3 = auxRetorno.Last().Substring(3,4).Split(',');
+                                currentPositionLine = int.Parse(vector3[0]);
+                                currentPositionColumn = int.Parse(vector3[1].Trim());
+                                auxRetorno.Remove(auxRetorno.Last());
+                                switch (nextPosition)
+                                {
+                                    case "C":
+                                        nextPosition = "B";
+                                        break;
+                                    case "E":
+                                        nextPosition = "D";
+                                        break;
+                                    case "D":
+                                        nextPosition = "E";
+                                        break;
+                                    case "B":
+                                        nextPosition = "C";
+                                        break;
+                                }
+                            }
+                            // faz o deslocamento
+                            switch (nextPosition)
+                            {
+                                case "C":
+                                    currentPositionLine--;
+                                    break;
+                                case "E":
+                                    currentPositionColumn--;
+                                    break;
+                                case "D":
+                                    currentPositionColumn++;
+                                    break;
+                                case "B":
+                                    currentPositionLine++;
+                                    break;
+                            }
+                            visitedPositions.Add(nextPosition + " [" + currentPositionLine + ", " + currentPositionColumn + "]");
+                            if (countPossibleMovements != 0)
+                            {
+                                auxRetorno.Add(nextPosition + " [" + currentPositionLine + ", " + currentPositionColumn + "]");
+                            }
+                            maze[currentPositionLine + "," + currentPositionColumn] = "1";
+                            previousPosition = nextPosition;
+                        }
+                        while (currentPositionColumn != columns && currentPositionColumn != 1 && currentPositionLine != lines && currentPositionLine != 1);
+
+                        foreach(var item in visitedPositions)
+                        {
+                            Console.WriteLine(item);
+                        }
+                        
+                    }
+                    else
                     {
                         Console.WriteLine("O labirinto não possui ponto de origem (X).");
                     }
